@@ -124,6 +124,7 @@ class Main(object):
                                   'gid': None,
                                   'split-large-files': "0",
                                   'hide-part-dir': "no",
+                                  'account-separator': None,
                                   # keystone auth 2.0 support
                                   'keystone-auth': False,
                                   'keystone-region-name': None,
@@ -218,6 +219,12 @@ class Main(object):
                           dest="gid",
                           default=config.get('sftpcloudfs', 'gid'),
                           help="GID to drop the privileges to when in daemon mode")
+
+        parser.add_option('--account-separator',
+                          type="str",
+                          dest="account_separator",
+                          default=config.get('sftpcloudfs', 'account-separator'),
+                          help="Character used to separate username/account in auth 1.0")
 
         parser.add_option('--keystone-auth',
                           action="store_true",
@@ -363,6 +370,7 @@ class Main(object):
                                           auth_timeout=self.options.auth_timeout,
                                           negotiation_timeout=self.options.negotiation_timeout,
                                           insecure=self.options.insecure,
+                                          account_separator=self.options.account_separator
                                           )
 
         dc = daemon.DaemonContext()

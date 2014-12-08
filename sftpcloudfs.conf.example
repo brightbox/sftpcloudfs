@@ -62,6 +62,9 @@
 # GID to drop privileges when in daemon mode.
 # gid = (empty)
 
+# Account separator to be used with Auth 1.0 (eg. USERNAME:ACCOUNT) (optional)
+# account-separator = (empty)
+
 # Auth 2.0 (Keystone), requires keystoneclient
 # keystone-auth = no
 

@@ -71,6 +71,7 @@ that supports following options:
     --pid-file=PID_FILE   Pid file location when in daemon mode
     --uid=UID             UID to drop the privileges to when in daemon mode
     --gid=GID             GID to drop the privileges to when in daemon mode
+    --account-separator   Character used to separate username/account in auth 1.0
     --keystone-auth       Use auth 2.0 (Keystone, requires keystoneclient)
     --keystone-region-name=REGION_NAME
                           Region name to be used in auth 2.0
@@ -92,6 +93,11 @@ server must be secured to prevent unauthorized access to the cached data.
 
 By default Swift auth 1.0 will be used, and is compatible with OpenStack
 Object Storage (Swift) using swauth authentication middleware.
+
+The optional account-separator option allows the specifying of the
+account name to be used in the url during auth 1.0. The username is
+split on the separator, with the second half being added to end of the
+auth url (e.g: https://auth.url/v1/account-name).
 
 Optionally OpenStack Identity Service 2.0 (*aka* keystone) can be used. Currently
 python-keystoneclient (0.3.2+) is required to use auth 2.0 and it can be enabled
