@@ -22,10 +22,10 @@ Install
 Requirements:
 
 - python (2.6)
-- paramiko (1.7.6+; 1.10.1 recommended)
+- paramiko (1.7.6+; 1.17.0+ recommended)
 - python-swiftclient (2.0+)
 - python-daemon (1.5.5)
-- ftp-cloudfs (0.30+)
+- ftp-cloudfs (0.35+)
 - python-memcached (1.45)
 
 These are the minimum recommended versions based in our testing
@@ -68,7 +68,7 @@ that supports following options:
     --disable-scp         Disable SCP support (default: enabled)
     --syslog              Enable logging to system logger (daemon facility)
     -v, --verbose         Show detailed information on logging
-    --pid-file=PID_FILE   Pid file location when in daemon mode
+    --pid-file=PID_FILE   Full path to the pid file location
     --uid=UID             UID to drop the privileges to when in daemon mode
     --gid=GID             GID to drop the privileges to when in daemon mode
     --account-separator   Character used to separate username/account in auth 1.0

@@ -2,7 +2,7 @@
 """
 Main function to setup the daemon process.
 
-Copyright (C) 2011-2014 by Memset Ltd. http://www.memset.com/
+Copyright (C) 2011-2016 by Memset Ltd. http://www.memset.com/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,10 +29,9 @@ import signal
 import sys
 import logging
 from logging.handlers import SysLogHandler
-from ConfigParser import RawConfigParser
+from ConfigParser import RawConfigParser, ParsingError
 from optparse import OptionParser
 import daemon
-import tempfile
 from Crypto import Random
 import paramiko
 from sftpcloudfs.server import ObjectStorageSFTPServer
@@ -115,6 +114,9 @@ class Main(object):
                                   'max-children': "20",
                                   'auth-timeout': "60",
                                   'negotiation-timeout': "0",
+                                  'keepalive': "0",
+                                  'ciphers': None,
+                                  'digests': None,
                                   'log-file': None,
                                   'syslog': 'no',
                                   'verbose': 'no',
@@ -133,9 +135,12 @@ class Main(object):
                                   'keystone-endpoint-type': default_ks_endpoint_type,
                                   })
 
-        if not config.read(config_file) and alt_config_file:
-            # the default conf file is optional
-            parser.error("failed to read %s" % config_file)
+        try:
+            if not config.read(config_file) and alt_config_file:
+                # the default conf file is optional
+                parser.error("failed to read %s" % config_file)
+        except ParsingError as ex:
+             parser.error("failed to read %s: %s" % (config_file, ex.message))
 
         if not config.has_section('sftpcloudfs'):
             config.add_section('sftpcloudfs')
@@ -206,7 +211,7 @@ class Main(object):
                           type="str",
                           dest="pid_file",
                           default=config.get('sftpcloudfs', 'pid-file'),
-                          help="Pid file location when in daemon mode")
+                          help="Full path to the pid file location")
 
         parser.add_option('--uid',
                           type="int",
@@ -277,9 +282,6 @@ class Main(object):
         except (IOError, paramiko.SSHException), e:
             parser.error("host-key-file: %s" % e)
 
-        if not options.pid_file:
-            options.pid_file = "%s/%s.pid" % (tempfile.gettempdir(), __package__)
-
         if options.memcache:
             ObjectStorageFS.memcache_hosts = options.memcache
             try:
@@ -287,9 +289,12 @@ class Main(object):
             except (ValueError, TypeError):
                 parser.error("memcache: invalid server address, ip:port expected")
 
-        self.pidfile = PIDFile(options.pid_file)
-        if self.pidfile.is_locked():
-            parser.error("pid-file found: %s\nIs the server already running?" % options.pid_file)
+        if options.pid_file:
+            self.pidfile = PIDFile(options.pid_file)
+            if self.pidfile.is_locked():
+                parser.error("pid-file found: %s\nIs the server already running?" % options.pid_file)
+        else:
+            self.pidfile = None
 
         try:
             options.max_children = int(config.get('sftpcloudfs', 'max-children'))
@@ -311,6 +316,23 @@ class Main(object):
 
         if options.negotiation_timeout < 0:
             parser.error('negotiation-timeout: invalid value')
+
+        try:
+            options.keepalive = int(config.get('sftpcloudfs', 'keepalive'))
+        except ValueError:
+            parser.error('keepalive: invalid value, integer expected')
+
+        if options.keepalive < 0:
+            parser.error('keepalive: invalid value')
+
+        options.secopts = {}
+        ciphers = config.get('sftpcloudfs', 'ciphers')
+        if ciphers:
+            options.secopts["ciphers"] = [x.strip() for x in ciphers.split(',')]
+
+        digests = config.get('sftpcloudfs', 'digests')
+        if digests:
+            options.secopts["digests"] = [x.strip() for x in digests.split(',')]
 
         try:
             options.split_size = int(config.get('sftpcloudfs', 'split-large-files'))*10**6
@@ -369,7 +391,9 @@ class Main(object):
                                           hide_part_dir=self.options.hide_part_dir,
                                           auth_timeout=self.options.auth_timeout,
                                           negotiation_timeout=self.options.negotiation_timeout,
+                                          keepalive=self.options.keepalive,
                                           insecure=self.options.insecure,
+                                          secopts=self.options.secopts,
                                           account_separator=self.options.account_separator
                                           )
 
@@ -405,7 +429,7 @@ class Main(object):
                         os.kill(pid, signal.SIGTERM)
                 server.server_close()
 
-        if self.pidfile.i_am_locking():
+        if self.pidfile and self.pidfile.i_am_locking():
             self.pidfile.release()
 
         return 0

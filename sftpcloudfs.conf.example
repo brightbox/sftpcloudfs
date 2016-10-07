@@ -37,6 +37,17 @@
 # Negotiation time limit in seconds, 0 to disable.
 # negotiation-timeout = 0
 
+# Keep alive packets interval in seconds, 0 to disable.
+# keepalive = 0
+
+# Comma-separated list of ciphers supported by paramiko,
+# otherwise defaults are used (eg aes128-ctr,aes256-ctr)
+# ciphers = (empty)
+
+# Comma-separated list of digests supported by paramilo,
+# otherwise defaults are used (eg hmac-sha2-256, hmac-sha1)
+# digests = (empty)
+
 # Large file support.
 # Specify a size in MB to split large files.
 # split-large-files = (empty)
@@ -53,7 +64,7 @@
 # Show detailed information on logging.
 # verbose = no
 
-# Pid file location when in daemon mode.
+# Full path to the pid file location.
 # pid-file = (empty)
 
 # UID to drop privileges when in daemon mode.

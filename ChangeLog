@@ -1,3 +1,37 @@
+2016-05-12 Juan Martinez <juan@memset.com>
+
+ * release 0.18.1:
+
+  - Minor documentation changes.
+
+  paramiko 1.17.0+ is highly recommended as it adds support for
+  hmac-sha2-256 digest.
+
+2015-09-11 Juan Martinez <juan@memset.com>
+
+ * release 0.18:
+
+  - Configuration support to set SSH ciphers and digests.
+  See sftpcloudfs.conf.example for further details.
+
+  Thanks to Oliver Bristow for the suggested patch.
+
+2015-01-16 Juan Martinez <juan@memset.com>
+
+ * release 0.17:
+
+  - Exposed SSH "keepalive" support with a new configuration token.
+
+2015-01-15 Juan Martinez <juan@memset.com>
+
+ * release 0.16:
+
+  - pid file is now optional and it fixes inconsistent behaviour. It now
+  will be used be used both in daemon and foreground mode as long as it
+  is specified either in the CLI or in the configuration file.
+
+  Thanks to Koert van der Veer for his report.
+
 2014-10-06 Juan Martinez <juan@memset.com>
 
  * release 0.15:
